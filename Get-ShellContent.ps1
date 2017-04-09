@@ -11,7 +11,7 @@ function Get-ShellContent
 	This script leverages modified strings2 to extract the input and output of any commandline process, running or dumped, encrypted or plaintext.
 	he script has a ComputerName parameter which allows it to be executed against multiple computers.
 	
-	Function: Invoke-Mimikatz
+	Function: Get-ShellContent
 	Author: Eyal Neemany (@Zwiitzer). https://www.javelin-networks.com
 	Strings2:  glmcdona. http://split-code.com/strings2.html
 	License:  https://opensource.org/licenses/BSD-3-Clause
