@@ -17,7 +17,7 @@ function Get-ShellContent
 	License:  https://opensource.org/licenses/BSD-3-Clause
 	Required Dependencies: Strings2 (included)
 	Optional Dependencies: None
-	Version: 1.0a
+	Version: 1.1a
 	Strings2 version: 1.1
 
 	.PARAMETER ProcessID
@@ -214,13 +214,18 @@ function Get-ShellContent
 		Write-Host ""
 		$ProcessList = @("conhost.exe","wscript.exe")
 		$DeepProc = @("conhost.exe","wscript.exe","cmd.exe","powershell.exe","python.exe","pythonw.exe")
+		$ExcludedNames = @("SensorDBSynch.exe","node.exe")
+		$ExcludedPIDs = @()
+		$CurrentPID = ([System.Diagnostics.Process]::GetCurrentProcess()).Id
 		if($Deep)
 		{
 			$ProcessList = $DeepProc
 		}
 		try
 		{
-			$PIDList = gwmi win32_process -computername $computername | where-Object {$ProcessList -contains $_.Name} | select ProcessId
+		$Plist = gwmi win32_process -computername $computername 
+		$ExcludedPIDs += ($Plist | where-Object {$ExcludedNames -contains $_.Name}).ProcessId
+		$PIDList = $Plist | where-Object {$ProcessList -contains $_.Name -and $CurrentPID -ne $_.ParentProcessId -and !($ExcludedPIDs -contains $_.ParentProcessId)} | select ProcessId, ParentProcessId
 		}
 		catch
 		{
