@@ -22,6 +22,5 @@ The IT-Tools project and all individual scripts are under the [BSD 3-Clause lice
 
 Refer to the comment-based help in each individual script for detailed usage information.
 
-To install this module, drop the entire powershell scripts into one of your module directories. The default PowerShell module paths are listed in the $Env:PSModulePath environment variable.
-
+To install any of these modules, drop the powershell scripts into one of any directory. 
 To use any of the modules, type `Import-Module PathTo\scriptName.ps1`
