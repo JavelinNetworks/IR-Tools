@@ -20,6 +20,8 @@ The IT-Tools project and all individual scripts are under the [BSD 3-Clause lice
 
 ## Usage
 
-Refer to the comment-based help in each individual script for detailed usage information.
-
 To install any of these modules, drop the powershell scripts into a directory and type `Import-Module PathTo\scriptName.ps1`
+
+Then run the Module from the Powershell.
+
+Refer to the comment-based help in each individual script for detailed usage information.
