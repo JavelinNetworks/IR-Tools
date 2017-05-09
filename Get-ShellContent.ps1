@@ -1,6 +1,6 @@
 ﻿<#
     Author: Eyal Neemany (@Zwiitzer)
-	https://www.javelin-networks.com
+	http://www.javelin-networks.com
 #>
 
 function Get-ShellContent
@@ -12,12 +12,12 @@ function Get-ShellContent
 	he script has a ComputerName parameter which allows it to be executed against multiple computers.
 	
 	Function: Get-ShellContent
-	Author: Eyal Neemany (@Zwiitzer). https://www.javelin-networks.com
+	Author: Eyal Neemany (@Zwiitzer). http://www.javelin-networks.com
 	Strings2:  glmcdona. http://split-code.com/strings2.html
 	License:  https://opensource.org/licenses/BSD-3-Clause
 	Required Dependencies: Strings2 (included)
 	Optional Dependencies: None
-	Version: 1.1a
+	Version: 1.1b
 	Strings2 version: 1.1
 
 	.PARAMETER ProcessID
@@ -214,7 +214,7 @@ function Get-ShellContent
 		Write-Host ""
 		$ProcessList = @("conhost.exe","wscript.exe")
 		$DeepProc = @("conhost.exe","wscript.exe","cmd.exe","powershell.exe","python.exe","pythonw.exe")
-		$ExcludedNames = @("SensorDBSynch.exe","node.exe")
+		$ExcludedNames = @("SensorDBSynch.exe","node.exe","QuickControl.exe","fdhost.exe","wlanext.exe","fsnotifier.exe","postgres.exe")
 		$ExcludedPIDs = @()
 		$CurrentPID = ([System.Diagnostics.Process]::GetCurrentProcess()).Id
 		if($Deep)
