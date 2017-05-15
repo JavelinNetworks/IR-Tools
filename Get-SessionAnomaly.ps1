@@ -1,24 +1,85 @@
 Function Get-SessionsAnomaly
 {
-<#
-.SYNOPSIS
-This script will determine the existence of Pass-The-Ticket and Pass-The-Hash attacks.
-.PARAMETER PTT
-Specify if you want to detect PTT anomaly by enetering $true value
-.PARAMETER PTH
-Specify if you want to detect PTH anomaly by enetering $true value
-.NOTES
-Run this script on endpoint you suspect to be infected, or involved in attack.
-.DESCRIPTION 
-Usage :
-Get-SessionAnomaly.ps1 -PTT $true | ft -auto
-Get-SessionAnomaly.ps1 -PTH $true | ft -auto
-#>
-Param(
-  [bool]$PTT=$false,
-  [bool]$PTH=$false
-)
+	<#
+	.SYNOPSIS
+	This script will determine the existence of Pass-The-Ticket and Pass-The-Hash attacks.
+	Can be also used to analyze current cached kerberos tickets on remote or local machine.
+	
+	Function: Get-SessionsAnomaly
+	Author: Eyal Neemany (@Zwiitzer). http://www.javelin-networks.com
+	License:  https://opensource.org/licenses/BSD-3-Clause
+	Required Dependencies: None
+	Optional Dependencies: None
+	Version: 1.2
 
+	.PARAMETER PTT
+	Specify if you want to detect PTT anomaly
+	.PARAMETER PTH
+	Specify if you want to detect PTH anomaly
+	.PARAMETER ComputerName
+	Specify the target endpoint to run this script on (Requires WinRM)
+	.NOTES
+	Run this script on endpoint you suspect to be infected, or involved in attack.
+	Not specifying PTT or PTH flag will return both
+	.Example
+	Get-SessionAnomaly -PTT -PTH | ft -auto
+	Get-SessionAnomaly -ComputerName "W10-WannaFry" | ft -auto
+	#>
+	Param(
+	  [switch]$PTT,
+	  [switch]$PTH,
+	  [string]$ComputerName="localhost"
+	)
+	
+	$asciiart = @"
+ _____             _         _____                   _     
+|   __|___ ___ ___|_|___ ___|  _  |___ ___ _____ ___| |_ _ 
+|__   | -_|_ -|_ -| | . |   |     |   | . |     | .'| | | |
+|_____|___|___|___|_|___|_|_|__|__|_|_|___|_|_|_|__,|_|_  | 
+                                                      |___|                                                             
+Eyal Neemany @Zwiitzer           V 1.2
+http://jblog.javelin-networks.com/blog	
+		  
+"@
+
+		if(!$PTT -and !$PTH)
+		{
+			$PTT = $true
+			$PTH = $true
+		}
+		write-host $asciiart -ForegroundColor White
+		if($ComputerName -ne "localhost")
+		{
+			Write-Host "Intiating Remote Connection with" $computerName -ForegroundColor White
+			return ((Invoke-Command -ComputerName $ComputerName -ScriptBlock ${function:Invoke-Sessions} -ArgumentList $PTT,$PTH) | select SessionAccount,TicketClient,ServiceTicket,LogonIdHex,LogonIdDec,Injected)
+		}
+		else
+		{
+			return (Invoke-Sessions -PTT $PTT -PTH $PTH | select SessionAccount,TicketClient,ServiceTicket,LogonIdHex,LogonIdDec,Injected)
+		}
+}
+
+Function Invoke-Sessions
+{
+	<#
+	.SYNOPSIS
+	This script will determine the existence of Pass-The-Ticket and Pass-The-Hash attacks.
+	.PARAMETER PTT
+	Specify if you want to detect PTT anomaly
+	.PARAMETER PTH
+	Specify if you want to detect PTH anomaly
+	.NOTES
+	Run this script on endpoint you suspect to be infected, or involved in attack.
+	Not specifying PTT or PTH flag will return both
+	.DESCRIPTION 
+	Usage :
+	Get-SessionAnomaly -PTT $true
+	Get-SessionAnomaly -PTH $true -PTT $true
+	#>
+	Param(
+	  [bool]$PTT=$false,
+	  [bool]$PTH=$false
+	)
 	## Data Gathering
 	$LOU = Get-WmiObject Win32_LoggedOnUser
 	$LOS_B = Get-WmiObject Win32_LogonSession
@@ -103,6 +164,9 @@ Param(
 		}
 	}
 
+	## Colored Results
+	$RedYes = Write-Output "Yes" -ForegroundColor Red
+	
 	## Suspicous Objects Corrolation Print
 	foreach ($obj in $TckObj) 
 	{
@@ -117,14 +181,17 @@ Param(
 	}
 
 	##PTH Object Creation
-	foreach ($obj in $PTH_S) 
+	if($PTH_S -ne $null)
 	{
-	$SessionAccount = ($ResObj | Where-Object {$_.idDec -like $obj.LogonId}).Account
-		$ObjectC = New-Object PSObject                                       
-				   $ObjectC | add-member Noteproperty SessionAccount     $SessionAccount                  
-				   $ObjectC | add-member Noteproperty LogonIdDec      $obj.LogonId
-				   $ObjectC | add-member Noteproperty Injected      "PTH Attack"
-		$PTHObj += $ObjectC
+		foreach ($obj in $PTH_S) 
+		{
+		$SessionAccount = ($ResObj | Where-Object {$_.idDec -like $obj.LogonId}).Account
+			$ObjectC = New-Object PSObject                                       
+					   $ObjectC | add-member Noteproperty SessionAccount     $SessionAccount                  
+					   $ObjectC | add-member Noteproperty LogonIdDec      $obj.LogonId
+					   $ObjectC | add-member Noteproperty Injected      "PTH Attack"
+			$PTHObj += $ObjectC
+		}
 	}
 	if($PTT)
 	{
