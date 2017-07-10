@@ -17,7 +17,7 @@ function Get-ShellContent
 	License:  https://opensource.org/licenses/BSD-3-Clause
 	Required Dependencies: Strings2 (included)
 	Optional Dependencies: None
-	Version: 1.1b
+	Version: 1.1c
 	Strings2 version: 1.1
 
 	.PARAMETER ProcessID
@@ -171,6 +171,18 @@ function Get-ShellContent
 			return $true
 		}
 		if ($line -like "*XPADDINGPADDINGXXPADDING*")
+		{
+			return $true
+		}
+		if ($line -like "*buyticket9.asp*")
+		{
+			return $true
+		}
+		if ($line -like "*2005 Dolby Laboratories*")
+		{
+			return $true
+		}
+		if($line.StartsWith("> Microsoft Corporation/(C)"))
 		{
 			return $true
 		}
